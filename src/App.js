@@ -16,14 +16,6 @@ const shuffle = inputArray => {
 shuffle(deckArray)
 let playerHand = []
 let dealerHand = []
-let playerHandValue = {
-  value: 0,
-  soft: "Nope"
-}
-let dealerHandValue = {
-  value: 0,
-  soft: "Nope"
-}
 
 const deal = (hand, deck) => {
   hand.push(deck.pop())
@@ -37,41 +29,76 @@ const calcHandValue = (hand, handObj) => {
       handObj.value += 10
       handObj.soft = "Yup"
     } else {
-      handObj.value += parseInt(hand[i])
+      handObj.value += parseInt(hand[i],0)
     }
   }
 }
 
-deal(playerHand, deckArray)
-deal(dealerHand, deckArray)
-deal(playerHand, deckArray)
-deal(dealerHand, deckArray)
-calcHandValue(playerHand, playerHandValue)
-calcHandValue(dealerHand, dealerHandValue)
-
 class App extends Component {
+  constructor(props){
+    super(props)
+    this.state = {
+      deck: deckArray,
+      playerHand: playerHand,
+      dealerHand: dealerHand,
+      playerHandValue: {
+        value: 0,
+        soft: "Nope"
+      },
+      dealerHandValue: {
+        value: 0,
+        soft: "Nope"
+      }
+    }
+  }
+
+  handleClick = e => {
+    e.preventDefault()
+    deal(this.state.playerHand, this.state.deck)
+  }
+
   render() {
+
+    deal(this.state.playerHand, this.state.deck)
+    deal(this.state.dealerHand, this.state.deck)
+    deal(this.state.playerHand, this.state.deck)
+    deal(this.state.dealerHand, this.state.deck)
+    calcHandValue(this.state.playerHand, this.state.playerHandValue)
+    calcHandValue(this.state.dealerHand, this.state.dealerHandValue)
+    const playerHandElements = this.state.playerHand.map(element => {
+      return (
+        <div key={element}>{element}</div>
+      )
+    })
+    const dealerHandElements = this.state.dealerHand.map(element => {
+      return (
+        <div key={element}>{element}</div>
+      )
+    })
     return (
       <div className="App">
         <div className="container">
-          <div>
-            Deck: {deckArray}
+          <div className="card">
+            Deck: {this.state.deck}
             <br/>
-            Number of cards remaining: {deckArray.length}
+            Number of cards remaining: {this.state.deck.length}
           </div>
-          <div>
-            Player Hand: {playerHand}
+          <div className="card">
+            Dealer Hand: {dealerHandElements}
             <br/>
-            Player Hand Value: {playerHandValue.value}
+            Dealer Hand Value: {this.state.dealerHandValue.value}
             <br/>
-            Soft? {playerHandValue.soft}
+            Soft? {this.state.dealerHandValue.soft}
           </div>
-          <div>
-            Dealer Hand: {dealerHand}
+          <div className="card">
+            Player Hand: {playerHandElements}
             <br/>
-            Dealer Hand Value: {dealerHandValue.value}
+            Player Hand Value: {this.state.playerHandValue.value}
             <br/>
-            Soft? {dealerHandValue.soft}
+            Soft? {this.state.playerHandValue.soft}
+            <br/>
+            <button onClick={this.handleClick}>Hit</button>
+            <button>Stand</button>
           </div>
         </div>
       </div>
