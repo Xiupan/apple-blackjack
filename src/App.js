@@ -14,12 +14,35 @@ const shuffle = inputArray => {
 }
 
 shuffle(deckArray)
+let playerHand = []
+let dealerHand = []
+
+const deal = (hand, deck) => {
+  hand.push(deck.pop())
+}
+
+deal(playerHand, deckArray)
+deal(dealerHand, deckArray)
+deal(playerHand, deckArray)
+deal(dealerHand, deckArray)
 
 class App extends Component {
   render() {
     return (
       <div className="App">
-        {deckArray}
+        <div className="container">
+          <div>
+            Deck: {deckArray}
+            <br/>
+            Number of cards remaining: {deckArray.length}
+          </div>
+          <div>
+            Player Hand: {playerHand}
+          </div>
+          <div>
+            Dealer Hand: {dealerHand}
+          </div>
+        </div>
       </div>
     );
   }
