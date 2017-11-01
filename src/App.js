@@ -19,6 +19,7 @@ let dealerHand = []
 
 const deal = (hand, deck) => {
   hand.push(deck.pop())
+  console.log(`Added card to ${hand}.`)
 }
 
 const calcHandValue = (hand, handObj) => {
@@ -55,16 +56,18 @@ class App extends Component {
   handleClick = e => {
     e.preventDefault()
     deal(this.state.playerHand, this.state.deck)
+    this.setState({
+      playerHand: this.state.playerHand
+    })
   }
 
   render() {
-
-    deal(this.state.playerHand, this.state.deck)
-    deal(this.state.dealerHand, this.state.deck)
-    deal(this.state.playerHand, this.state.deck)
-    deal(this.state.dealerHand, this.state.deck)
-    calcHandValue(this.state.playerHand, this.state.playerHandValue)
-    calcHandValue(this.state.dealerHand, this.state.dealerHandValue)
+    // deal(this.state.playerHand, this.state.deck)
+    // deal(this.state.dealerHand, this.state.deck)
+    // deal(this.state.playerHand, this.state.deck)
+    // deal(this.state.dealerHand, this.state.deck)
+    // calcHandValue(this.state.playerHand, this.state.playerHandValue)
+    // calcHandValue(this.state.dealerHand, this.state.dealerHandValue)
     const playerHandElements = this.state.playerHand.map(element => {
       return (
         <div key={element}>{element}</div>
