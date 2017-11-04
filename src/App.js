@@ -37,7 +37,18 @@ class App extends Component {
   constructor(props){
     super(props)
     this.state = {
-      deckId: ""
+      deckId: "",
+      deck: [{}],
+      player: {
+        hand: [{}],
+        handValue: 0,
+        soft: false
+      },
+      dealer: {
+        hand: [{}],
+        handValue: 0,
+        soft: false
+      }
     }
   }
 
@@ -48,23 +59,32 @@ class App extends Component {
         this.setState({
           deckId: data.deck_id
         })
+        this.getNewDeck()
       })
   }
 
-  draw = (count) => {
-    fetch(`https://deckofcardsapi.com/api/deck/${this.state.deckId}/draw/?count=${count}`)
+  getNewDeck = () => {
+    fetch(`https://deckofcardsapi.com/api/deck/${this.state.deckId}/draw/?count=52`)
       .then(response => response.json())
       .then(data => {
-        console.log(data)
+        this.setState({
+          deck: data
+        })
       })
+  }
+
+  hitMe = () => {
+    this.state.player.hand.push(this.state.deck.cards.pop())
+    this.setState(this.state)
   }
 
   render() {
     console.log(`State Deck ID: ${this.state.deckId}`)
+    console.log(this.state)
     return (
       <div className="App">
         <div className="container">
-          <button onClick={() => {this.draw(1)}}>Hit</button>
+          <button onClick={()=>{this.hitMe()}}>Hit</button>
         </div>
       </div>
     );
