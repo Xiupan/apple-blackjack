@@ -40,12 +40,12 @@ class App extends Component {
       deckId: "",
       deck: [{}],
       player: {
-        hand: [{}],
+        hand: [],
         handValue: 0,
         soft: false
       },
       dealer: {
-        hand: [{}],
+        hand: [],
         handValue: 0,
         soft: false
       }
@@ -81,10 +81,20 @@ class App extends Component {
   render() {
     console.log(`State Deck ID: ${this.state.deckId}`)
     console.log(this.state)
+    const playerHandElements = this.state.player.hand.map(element => {
+      return(
+        <div key={element.code}>
+          <img src={element.image} alt=""/>
+        </div>
+      )
+    })
     return (
       <div className="App">
         <div className="container">
           <button onClick={()=>{this.hitMe()}}>Hit</button>
+        </div>
+        <div>
+          {playerHandElements}
         </div>
       </div>
     );
