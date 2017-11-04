@@ -1,38 +1,6 @@
 import React, { Component } from 'react';
 import './App.css';
 
-// const shuffle = inputArray => {
-//   let j, temp, i
-//   for (i = inputArray.length - 1; i > 0; i--) {
-//       j = Math.floor(Math.random() * (i + 1))
-//       temp = inputArray[i];
-//       inputArray[i] = inputArray[j];
-//       inputArray[j] = temp;
-//   }
-// }
-//
-// shuffle(deckArray)
-// let playerHand = []
-// let dealerHand = []
-//
-// const deal = (hand, deck) => {
-//   hand.push(deck.pop())
-//   console.log(`Added card to ${hand}.`)
-// }
-//
-// const calcHandValue = (hand, handObj) => {
-//   for (let i = 0; i < hand.length; i++) {
-//     if (hand[i] === "K" || hand[i] === "Q" || hand[i] === "J") {
-//       handObj.value += 10
-//     } else if (hand[i] === "A") {
-//       handObj.value += 10
-//       handObj.soft = "Yup"
-//     } else {
-//       handObj.value += parseInt(hand[i],0)
-//     }
-//   }
-// }
-
 class App extends Component {
   constructor(props){
     super(props)
@@ -77,6 +45,27 @@ class App extends Component {
         this.hitMe()
         this.dealerHit()
       })
+  }
+
+  blankState = () => {
+    this.setState({
+      player: {
+        hand: [],
+        handValue: 0,
+        soft: false
+      },
+      dealer: {
+        hand: [],
+        handValue: 0,
+        soft: false
+      },
+      gameEndMessage: "",
+      messageStyle: ""
+    })
+  }
+
+  newRound = () => {
+    this.blankState()
   }
 
   hitMe = () => {
@@ -192,8 +181,11 @@ class App extends Component {
             </div>
           }
           {this.state.gameEndMessage !== "" &&
-            <div className={this.state.messageStyle}>
-              {this.state.gameEndMessage}
+            <div>
+              <div className={this.state.messageStyle}>
+                {this.state.gameEndMessage}
+              </div>
+              <button onClick={()=>{this.newRound()}}>New Round</button>
             </div>
           }
           <div className="player-container">
