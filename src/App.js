@@ -51,12 +51,20 @@ class App extends Component {
       })
   }
 
+  draw = (count) => {
+    fetch(`https://deckofcardsapi.com/api/deck/${this.state.deckId}/draw/?count=${count}`)
+      .then(response => response.json())
+      .then(data => {
+        console.log(data)
+      })
+  }
+
   render() {
-    console.log(this.state)
+    console.log(`State Deck ID: ${this.state.deckId}`)
     return (
       <div className="App">
         <div className="container">
-
+          <button onClick={() => {this.draw(1)}}>Hit</button>
         </div>
       </div>
     );
