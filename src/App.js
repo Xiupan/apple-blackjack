@@ -79,21 +79,68 @@ class App extends Component {
 
   hitMe = () => {
     this.state.player.hand.push(this.state.deck.cards.pop())
-    this.setState(this.state)
+    this.calcPlayerHandValue()
   }
 
   dealerHit = () => {
     this.state.dealer.hand.push(this.state.deck.cards.pop())
-    this.setState(this.state)
+    this.calcDealerHandValue()
+  }
+
+  calcPlayerHandValue = () => {
+    let tempValue = 0
+    let softBool = false
+    const playerHand = this.state.player.hand
+    for (let i = 0; i < playerHand.length; i++) {
+      if (playerHand[i].value === "KING" || playerHand[i].value === "QUEEN" || playerHand[i].value === "JACK") {
+        tempValue += 10
+      } else if (playerHand[i].value === "ACE") {
+        tempValue += 10
+        softBool = true
+      } else {
+        tempValue += parseInt(playerHand[i].value, 0)
+      }
+    }
+    this.setState({
+      player: {
+        hand: this.state.player.hand,
+        handValue: tempValue,
+        soft: softBool
+      }
+    })
+    console.log("Player Hand Value: " + tempValue, softBool)
+  }
+
+  calcDealerHandValue = () => {
+    let tempValue = 0
+    let softBool = false
+    const dealerHand = this.state.dealer.hand
+    for (let i = 0; i < dealerHand.length; i++) {
+      if (dealerHand[i].value === "KING" || dealerHand[i].value === "QUEEN" || dealerHand[i].value === "JACK") {
+        tempValue += 10
+      } else if (dealerHand[i].value === "ACE") {
+        tempValue += 10
+        softBool = true
+      } else {
+        tempValue += parseInt(dealerHand[i].value, 0)
+      }
+    }
+    this.setState({
+      dealer: {
+        hand: this.state.dealer.hand,
+        handValue: tempValue,
+        soft: softBool
+      }
+    })
+    console.log("Dealer Hand Value: " + tempValue, softBool)
   }
 
   render() {
-    console.log(`State Deck ID: ${this.state.deckId}`)
-    console.log(this.state)
+    // displays player's card images
     const playerHandElements = this.state.player.hand.map(element => {
       return(
         <div key={element.code}>
-          <img src={element.image} alt={element.code}/>
+          <img className="player-card-images" src={element.image} alt={element.code}/>
         </div>
       )
     })
@@ -101,9 +148,9 @@ class App extends Component {
       <div className="App">
         <div className="container">
           <button onClick={()=>{this.hitMe()}}>Hit</button>
-        </div>
-        <div>
-          {playerHandElements}
+          <div className="player-container">
+            {playerHandElements}
+          </div>
         </div>
       </div>
     );
