@@ -59,22 +59,31 @@ class App extends Component {
         this.setState({
           deckId: data.deck_id
         })
-        this.getNewDeck()
+        this.gameStart()
       })
   }
 
-  getNewDeck = () => {
+  gameStart = () => {
     fetch(`https://deckofcardsapi.com/api/deck/${this.state.deckId}/draw/?count=52`)
       .then(response => response.json())
       .then(data => {
         this.setState({
           deck: data
         })
+        this.hitMe()
+        this.dealerHit()
+        this.hitMe()
+        this.dealerHit()
       })
   }
 
   hitMe = () => {
     this.state.player.hand.push(this.state.deck.cards.pop())
+    this.setState(this.state)
+  }
+
+  dealerHit = () => {
+    this.state.dealer.hand.push(this.state.deck.cards.pop())
     this.setState(this.state)
   }
 
@@ -84,7 +93,7 @@ class App extends Component {
     const playerHandElements = this.state.player.hand.map(element => {
       return(
         <div key={element.code}>
-          <img src={element.image} alt=""/>
+          <img src={element.image} alt={element.code}/>
         </div>
       )
     })
