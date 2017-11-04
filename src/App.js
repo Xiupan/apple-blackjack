@@ -48,7 +48,9 @@ class App extends Component {
         hand: [],
         handValue: 0,
         soft: false
-      }
+      },
+      gameEndMessage: "",
+      messageStyle: ""
     }
   }
 
@@ -101,13 +103,20 @@ class App extends Component {
         tempValue += parseInt(playerHand[i].value, 0)
       }
     }
-    this.setState({
-      player: {
-        hand: this.state.player.hand,
-        handValue: tempValue,
-        soft: softBool
-      }
-    })
+    if (tempValue > 21) {
+      this.setState({
+        gameEndMessage: "Player Busts!",
+        messageStyle: "alert alert-danger"
+      })
+    } else {
+      this.setState({
+        player: {
+          hand: this.state.player.hand,
+          handValue: tempValue,
+          soft: softBool
+        }
+      })
+    }
     console.log("Player Hand Value: " + tempValue, softBool)
   }
 
@@ -135,6 +144,35 @@ class App extends Component {
     console.log("Dealer Hand Value: " + tempValue, softBool)
   }
 
+  determineWinner = () => {
+    let message = ""
+    let messageStyle = ""
+    // as long as player hand value does not exceed 21, check to see who won. Otherwise, player busts.
+    if (this.state.player.handValue <= 21) {
+      if (this.state.player.handValue > this.state.dealer.handValue) {
+        console.log("Player Wins!")
+        message = "Player wins this round!"
+        messageStyle = "alert alert-success"
+      } else if (this.state.player.handValue < this.state.dealer.handValue) {
+        console.log("Dealer wins, player loses!")
+        message = "Dealer wins, player loses this round!"
+        messageStyle = "alert alert-danger"
+      } else if (this.state.player.handValue === this.state.dealer.handValue) {
+        console.log("Game is a push. No one wins.")
+        message = "Game is a push. No one wins this round."
+        messageStyle = "alert alert-info"
+      }
+    } else {
+      console.log("Player busts! Player loses this round!")
+      message = "Player busts! Player loses this round!"
+      messageStyle = "alert alert-danger"
+    }
+    this.setState({
+      gameEndMessage: message,
+      messageStyle: messageStyle
+    })
+  }
+
   render() {
     // displays player's card images
     const playerHandElements = this.state.player.hand.map(element => {
@@ -147,7 +185,17 @@ class App extends Component {
     return (
       <div className="App">
         <div className="container">
-          <button onClick={()=>{this.hitMe()}}>Hit</button>
+          {this.state.gameEndMessage === "" &&
+            <div>
+              <button onClick={()=>{this.hitMe()}}>Hit</button>
+              <button onClick={()=>{this.determineWinner()}}>Stand</button>
+            </div>
+          }
+          {this.state.gameEndMessage !== "" &&
+            <div className={this.state.messageStyle}>
+              {this.state.gameEndMessage}
+            </div>
+          }
           <div className="player-container">
             {playerHandElements}
           </div>
