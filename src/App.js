@@ -10,12 +10,14 @@ class App extends Component {
       player: {
         hand: [],
         handValue: 0,
-        soft: false
+        soft: false,
+        busted: false
       },
       dealer: {
         hand: [],
         handValue: 0,
-        soft: false
+        soft: false,
+        busted: false
       },
       gameEndMessage: "",
       messageStyle: ""
@@ -47,25 +49,56 @@ class App extends Component {
       })
   }
 
-  blankState = () => {
+  // Had to repeat calc value code because it was causing unexpected behavior running multiple functions together all setting state separately.
+  newRound = () => {
+    let playerNewHand = []
+    let dealerNewHand = []
+    playerNewHand.push(this.state.deck.cards.pop())
+    playerNewHand.push(this.state.deck.cards.pop())
+    dealerNewHand.push(this.state.deck.cards.pop())
+    dealerNewHand.push(this.state.deck.cards.pop())
+    let tempValue = 0
+    let softBool = false
+    const playerHand = playerNewHand
+    for (let i = 0; i < playerHand.length; i++) {
+      if (playerHand[i].value === "KING" || playerHand[i].value === "QUEEN" || playerHand[i].value === "JACK") {
+        tempValue += 10
+      } else if (playerHand[i].value === "ACE") {
+        tempValue += 10
+        softBool = true
+      } else {
+        tempValue += parseInt(playerHand[i].value, 0)
+      }
+    }
+    let dealerTempValue = 0
+    let dealerSoftBool = false
+    const dealerHand = dealerNewHand
+    for (let i = 0; i < dealerHand.length; i++) {
+      if (dealerHand[i].value === "KING" || dealerHand[i].value === "QUEEN" || dealerHand[i].value === "JACK") {
+        dealerTempValue += 10
+      } else if (dealerHand[i].value === "ACE") {
+        dealerTempValue += 10
+        dealerSoftBool = true
+      } else {
+        dealerTempValue += parseInt(dealerHand[i].value, 0)
+      }
+    }
     this.setState({
       player: {
-        hand: [],
-        handValue: 0,
-        soft: false
+        hand: playerNewHand,
+        handValue: tempValue,
+        soft: softBool,
+        busted: false
       },
       dealer: {
-        hand: [],
-        handValue: 0,
-        soft: false
+        hand: dealerNewHand,
+        handValue: dealerTempValue,
+        soft: dealerSoftBool,
+        busted: false
       },
       gameEndMessage: "",
       messageStyle: ""
     })
-  }
-
-  newRound = () => {
-    this.blankState()
   }
 
   hitMe = () => {
@@ -76,6 +109,14 @@ class App extends Component {
   dealerHit = () => {
     this.state.dealer.hand.push(this.state.deck.cards.pop())
     this.calcDealerHandValue()
+  }
+
+  checkBusted = (inputValue) => {
+    if (inputValue > 21) {
+      return true
+    } else {
+      return false
+    }
   }
 
   calcPlayerHandValue = () => {
@@ -92,9 +133,15 @@ class App extends Component {
         tempValue += parseInt(playerHand[i].value, 0)
       }
     }
-    if (tempValue > 21) {
+    if (this.checkBusted(tempValue) === true) {
       this.setState({
-        gameEndMessage: "Player Busts!",
+        player: {
+          hand: this.state.player.hand,
+          handValue: tempValue,
+          soft: softBool,
+          busted: true
+        },
+        gameEndMessage: "Player Busted!",
         messageStyle: "alert alert-danger"
       })
     } else {
@@ -102,11 +149,13 @@ class App extends Component {
         player: {
           hand: this.state.player.hand,
           handValue: tempValue,
-          soft: softBool
-        }
+          soft: softBool,
+          busted: this.state.player.busted
+        },
+        gameEndMessage: "",
+        messageStyle: ""
       })
     }
-    console.log("Player Hand Value: " + tempValue, softBool)
   }
 
   calcDealerHandValue = () => {
@@ -123,38 +172,46 @@ class App extends Component {
         tempValue += parseInt(dealerHand[i].value, 0)
       }
     }
-    this.setState({
-      dealer: {
-        hand: this.state.dealer.hand,
-        handValue: tempValue,
-        soft: softBool
-      }
-    })
-    console.log("Dealer Hand Value: " + tempValue, softBool)
+    if (this.checkBusted(tempValue) === true) {
+      this.setState({
+        dealer: {
+          hand: this.state.dealer.hand,
+          handValue: tempValue,
+          soft: softBool,
+          busted: true
+        },
+        gameEndMessage: "Dealer busted! Player wins!",
+        messageStyle: "alert alert-success"
+      })
+    } else {
+      this.setState({
+        dealer: {
+          hand: this.state.dealer.hand,
+          handValue: tempValue,
+          soft: softBool,
+          busted: this.state.dealer.busted
+        },
+        gameEndMessage: "",
+        messageStyle: ""
+      })
+    }
   }
 
   determineWinner = () => {
     let message = ""
     let messageStyle = ""
-    // as long as player hand value does not exceed 21, check to see who won. Otherwise, player busts.
-    if (this.state.player.handValue <= 21) {
-      if (this.state.player.handValue > this.state.dealer.handValue) {
-        console.log("Player Wins!")
-        message = "Player wins this round!"
-        messageStyle = "alert alert-success"
-      } else if (this.state.player.handValue < this.state.dealer.handValue) {
-        console.log("Dealer wins, player loses!")
-        message = "Dealer wins, player loses this round!"
-        messageStyle = "alert alert-danger"
-      } else if (this.state.player.handValue === this.state.dealer.handValue) {
-        console.log("Game is a push. No one wins.")
-        message = "Game is a push. No one wins this round."
-        messageStyle = "alert alert-info"
-      }
-    } else {
-      console.log("Player busts! Player loses this round!")
-      message = "Player busts! Player loses this round!"
+    if (this.state.player.handValue > this.state.dealer.handValue) {
+      console.log("Player Wins!")
+      message = "Player wins this round!"
+      messageStyle = "alert alert-success"
+    } else if (this.state.player.handValue < this.state.dealer.handValue) {
+      console.log("Dealer wins, player loses!")
+      message = "Dealer wins, player loses this round!"
       messageStyle = "alert alert-danger"
+    } else if (this.state.player.handValue === this.state.dealer.handValue) {
+      console.log("Game is a push. No one wins.")
+      message = "Game is a push. No one wins this round."
+      messageStyle = "alert alert-info"
     }
     this.setState({
       gameEndMessage: message,
