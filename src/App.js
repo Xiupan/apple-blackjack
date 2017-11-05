@@ -59,28 +59,36 @@ class App extends Component {
     dealerNewHand.push(this.state.deck.cards.pop())
     let tempValue = 0
     let softBool = false
+    let playerTempSoftValue = 0
     const playerHand = playerNewHand
     for (let i = 0; i < playerHand.length; i++) {
       if (playerHand[i].value === "KING" || playerHand[i].value === "QUEEN" || playerHand[i].value === "JACK") {
         tempValue += 10
+        playerTempSoftValue += 10
       } else if (playerHand[i].value === "ACE") {
         tempValue += 10
+        playerTempSoftValue += 1
         softBool = true
       } else {
         tempValue += parseInt(playerHand[i].value, 0)
+        playerTempSoftValue += parseInt(playerHand[i].value, 0)
       }
     }
     let dealerTempValue = 0
     let dealerSoftBool = false
+    let dealerTempSoftValue = 0
     const dealerHand = dealerNewHand
     for (let i = 0; i < dealerHand.length; i++) {
       if (dealerHand[i].value === "KING" || dealerHand[i].value === "QUEEN" || dealerHand[i].value === "JACK") {
         dealerTempValue += 10
+        dealerTempSoftValue += 10
       } else if (dealerHand[i].value === "ACE") {
         dealerTempValue += 10
+        dealerTempSoftValue += 1
         dealerSoftBool = true
       } else {
         dealerTempValue += parseInt(dealerHand[i].value, 0)
+        dealerTempSoftValue += parseInt(dealerHand[i].value, 0)
       }
     }
     this.setState({
@@ -88,12 +96,14 @@ class App extends Component {
         hand: playerNewHand,
         handValue: tempValue,
         soft: softBool,
+        softValue: playerTempSoftValue,
         busted: false
       },
       dealer: {
         hand: dealerNewHand,
         handValue: dealerTempValue,
         soft: dealerSoftBool,
+        softValue: dealerTempSoftValue,
         busted: false
       },
       gameEndMessage: "",
@@ -111,8 +121,8 @@ class App extends Component {
     this.calcDealerHandValue()
   }
 
-  checkBusted = (inputValue) => {
-    if (inputValue > 21) {
+  checkBusted = (inputValue, softInputValue) => {
+    if (inputValue > 21 && softInputValue > 21) {
       return true
     } else {
       return false
@@ -121,24 +131,29 @@ class App extends Component {
 
   calcPlayerHandValue = () => {
     let tempValue = 0
+    let softValue = 0
     let softBool = false
     const playerHand = this.state.player.hand
     for (let i = 0; i < playerHand.length; i++) {
       if (playerHand[i].value === "KING" || playerHand[i].value === "QUEEN" || playerHand[i].value === "JACK") {
         tempValue += 10
+        softValue += 10
       } else if (playerHand[i].value === "ACE") {
         tempValue += 10
+        softValue += 1
         softBool = true
       } else {
         tempValue += parseInt(playerHand[i].value, 0)
+        softValue += parseInt(playerHand[i].value, 0)
       }
     }
-    if (this.checkBusted(tempValue) === true) {
+    if (this.checkBusted(tempValue, softValue) === true) {
       this.setState({
         player: {
           hand: this.state.player.hand,
           handValue: tempValue,
           soft: softBool,
+          softValue: softValue,
           busted: true
         },
         gameEndMessage: "Player Busted!",
@@ -150,6 +165,7 @@ class App extends Component {
           hand: this.state.player.hand,
           handValue: tempValue,
           soft: softBool,
+          softValue: softValue,
           busted: this.state.player.busted
         },
         gameEndMessage: "",
@@ -161,23 +177,28 @@ class App extends Component {
   calcDealerHandValue = () => {
     let tempValue = 0
     let softBool = false
+    let softValue = 0
     const dealerHand = this.state.dealer.hand
     for (let i = 0; i < dealerHand.length; i++) {
       if (dealerHand[i].value === "KING" || dealerHand[i].value === "QUEEN" || dealerHand[i].value === "JACK") {
         tempValue += 10
+        softValue += 10
       } else if (dealerHand[i].value === "ACE") {
         tempValue += 10
+        softValue += 1
         softBool = true
       } else {
         tempValue += parseInt(dealerHand[i].value, 0)
+        softValue += parseInt(dealerHand[i].value, 0)
       }
     }
-    if (this.checkBusted(tempValue) === true) {
+    if (this.checkBusted(tempValue, softValue) === true) {
       this.setState({
         dealer: {
           hand: this.state.dealer.hand,
           handValue: tempValue,
           soft: softBool,
+          softValue: softValue,
           busted: true
         },
         gameEndMessage: "Dealer busted! Player wins!",
@@ -189,6 +210,7 @@ class App extends Component {
           hand: this.state.dealer.hand,
           handValue: tempValue,
           soft: softBool,
+          softValue: softValue,
           busted: this.state.dealer.busted
         },
         gameEndMessage: "",
@@ -200,15 +222,17 @@ class App extends Component {
   determineWinner = () => {
     let message = ""
     let messageStyle = ""
-    if (this.state.player.handValue > this.state.dealer.handValue) {
+    const playerHandValue = this.state.player.handValue
+    const dealerHandValue = this.state.dealer.handValue
+    if (playerHandValue > dealerHandValue) {
       console.log("Player Wins!")
       message = "Player wins this round!"
       messageStyle = "alert alert-success"
-    } else if (this.state.player.handValue < this.state.dealer.handValue) {
+    } else if (playerHandValue < dealerHandValue) {
       console.log("Dealer wins, player loses!")
       message = "Dealer wins, player loses this round!"
       messageStyle = "alert alert-danger"
-    } else if (this.state.player.handValue === this.state.dealer.handValue) {
+    } else if (playerHandValue === dealerHandValue) {
       console.log("Game is a push. No one wins.")
       message = "Game is a push. No one wins this round."
       messageStyle = "alert alert-info"
