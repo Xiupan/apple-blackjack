@@ -20,7 +20,8 @@ class App extends Component {
         busted: false
       },
       gameEndMessage: "",
-      messageStyle: ""
+      messageStyle: "",
+      dealerHit: false
     }
   }
 
@@ -107,7 +108,8 @@ class App extends Component {
         busted: false
       },
       gameEndMessage: "",
-      messageStyle: ""
+      messageStyle: "",
+      dealerHit: false
     })
   }
 
@@ -119,6 +121,7 @@ class App extends Component {
   dealerHit = () => {
     this.state.dealer.hand.push(this.state.deck.cards.pop())
     this.calcDealerHandValue()
+    console.log(`Inside dealerHit function. ${this.state.dealer.handValue}`)
   }
 
   checkBusted = (inputValue, softInputValue) => {
@@ -157,7 +160,8 @@ class App extends Component {
           busted: true
         },
         gameEndMessage: "Player Busted!",
-        messageStyle: "alert alert-danger"
+        messageStyle: "alert alert-danger",
+        dealerHit: this.state.dealerHit
       })
     } else {
       this.setState({
@@ -169,7 +173,8 @@ class App extends Component {
           busted: this.state.player.busted
         },
         gameEndMessage: "",
-        messageStyle: ""
+        messageStyle: "",
+        dealerHit: this.state.dealerHit
       })
     }
   }
@@ -202,7 +207,8 @@ class App extends Component {
           busted: true
         },
         gameEndMessage: "Dealer busted! Player wins!",
-        messageStyle: "alert alert-success"
+        messageStyle: "alert alert-success",
+        dealerHit: this.state.dealerHit
       })
     } else {
       this.setState({
@@ -214,33 +220,91 @@ class App extends Component {
           busted: this.state.dealer.busted
         },
         gameEndMessage: "",
-        messageStyle: ""
+        messageStyle: "",
+        dealerHit: this.state.dealerHit
       })
+    }
+    console.log(`Inside calcDealerHandValue function. ${this.state.dealer.handValue}`)
+  }
+
+  dealerHitLogic = () => {
+    if (this.state.dealer.handValue < 17 || (this.state.dealer.handValue === 17 && this.state.dealer.soft === true)) {
+      this.state.dealer.hand.push(this.state.deck.cards.pop())
+      this.setState(this.state)
+      let tempValue = 0
+      let softBool = false
+      let softValue = 0
+      const dealerHand = this.state.dealer.hand
+      // translates card string values into integers
+      for (let i = 0; i < dealerHand.length; i++) {
+        if (dealerHand[i].value === "KING" || dealerHand[i].value === "QUEEN" || dealerHand[i].value === "JACK") {
+          tempValue += 10
+          softValue += 10
+        } else if (dealerHand[i].value === "ACE") {
+          tempValue += 10
+          softValue += 1
+          softBool = true
+        } else {
+          tempValue += parseInt(dealerHand[i].value, 0)
+          softValue += parseInt(dealerHand[i].value, 0)
+        }
+      }
+      if (this.checkBusted(tempValue, softValue) === true) {
+        this.setState({
+          dealer: {
+            hand: this.state.dealer.hand,
+            handValue: tempValue,
+            soft: softBool,
+            softValue: softValue,
+            busted: true
+          },
+          gameEndMessage: "Dealer busted! Player wins!",
+          messageStyle: "alert alert-success",
+          dealerHit: false
+        })
+      } else {
+        this.setState({
+          dealer: {
+            hand: this.state.dealer.hand,
+            handValue: tempValue,
+            soft: softBool,
+            softValue: softValue,
+            busted: this.state.dealer.busted
+          },
+          gameEndMessage: "",
+          messageStyle: "",
+          dealerHit: true
+        }, this.dealerHitLogic())
+      }
     }
   }
 
   determineWinner = () => {
     let message = ""
     let messageStyle = ""
-    const playerHandValue = this.state.player.handValue
-    const dealerHandValue = this.state.dealer.handValue
-    if (playerHandValue > dealerHandValue) {
-      console.log("Player Wins!")
-      message = "Player wins this round!"
-      messageStyle = "alert alert-success"
-    } else if (playerHandValue < dealerHandValue) {
-      console.log("Dealer wins, player loses!")
-      message = "Dealer wins, player loses this round!"
-      messageStyle = "alert alert-danger"
-    } else if (playerHandValue === dealerHandValue) {
-      console.log("Game is a push. No one wins.")
-      message = "Game is a push. No one wins this round."
-      messageStyle = "alert alert-info"
+    let playerHandValue = this.state.player.handValue
+    let dealerHandValue = this.state.dealer.handValue
+    if (this.state.player.busted === false && this.state.dealer.busted === false) {
+      if (playerHandValue > dealerHandValue) {
+        console.log("Player Wins!")
+        message = "Player wins this round!"
+        messageStyle = "alert alert-success"
+      } else if (playerHandValue < dealerHandValue) {
+        console.log("Dealer wins, player loses!")
+        message = "Dealer wins, player loses this round!"
+        messageStyle = "alert alert-danger"
+      } else if (playerHandValue === dealerHandValue) {
+        console.log("Game is a push. No one wins.")
+        message = "Game is a push. No one wins this round."
+        messageStyle = "alert alert-info"
+      }
     }
     this.setState({
       gameEndMessage: message,
-      messageStyle: messageStyle
-    })
+      messageStyle: messageStyle,
+      dealerHit: true
+    }, this.dealerHitLogic())
+
   }
 
   render() {
